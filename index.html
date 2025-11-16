@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quiz Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Sans', 'Meiryo', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f7f7f7;
+            border-radius: 10px;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .timer {
+            color: #e74c3c;
+        }
+
+        .timer.fast {
+            color: #27ae60;
+        }
+
+        .question-area {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .question-text {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #333;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin: 15px 0;
+            background: white;
+            max-width: 100%;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .btn-submit {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-start {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        .popup {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            min-width: 280px;
+            max-width: 90%;
+            animation: scaleIn 0.3s;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .popup-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .popup-message {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .popup-detail {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .popup-points {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 10px;
+        }
+
+        .popup.correct {
+            border: 5px solid #2ecc71;
+        }
+
+        .popup.incorrect {
+            border: 5px solid #e74c3c;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .start-screen, .end-screen {
+            text-align: center;
+        }
+
+        .start-screen h2, .end-screen h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .instructions {
+            text-align: left;
+            background: #f7f7f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .final-score {
+            font-size: 48px;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .score-breakdown {
+            background: #f7f7f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .score-breakdown div {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .score-breakdown div:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 8px;
+        }
+
+        .name-input-section {
+            margin: 15px 0;
+        }
+
+        .name-input-section input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .ranking, .history {
+            background: #f7f7f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .ranking h3, .history h3 {
+            margin-bottom: 12px;
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .ranking-item, .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .ranking-rank {
+            font-size: 18px;
+            font-weight: bold;
+            min-width: 35px;
+        }
+
+        .ranking-rank.gold { color: #f39c12; }
+        .ranking-rank.silver { color: #95a5a6; }
+        .ranking-rank.bronze { color: #cd7f32; }
+
+        .ranking-name {
+            flex-grow: 1;
+            text-align: left;
+            margin: 0 10px;
+        }
+
+        .ranking-score {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .streak {
+            background: #ffeaa7;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #d63031;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .level-select, .language-select {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .level-btn, .lang-btn {
+            padding: 15px;
+            background: #f0f0f0;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .level-btn:hover, .lang-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .level-btn.selected, .lang-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .lang-btn {
+            font-size: 13px;
+            padding: 12px 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="gameTitle">📐 Math Quiz Game</h1>
+
+        <div id="startScreen" class="start-screen">
+            <h2>Select Difficulty Level</h2>
+            <div class="level-select">
+                <button class="level-btn" onclick="selectLevel('elementary')">
+                    🟢<br>Elementary
+                </button>
+                <button class="level-btn" onclick="selectLevel('middle')">
+                    🟡<br>Middle School
+                </button>
+                <button class="level-btn selected" onclick="selectLevel('high')">
+                    🔴<br>High School
+                </button>
+            </div>
+
+            <h2>Select Language</h2>
+            <div class="language-select">
+                <button class="lang-btn selected" onclick="selectLanguage('en')">🇺🇸 English</button>
+                <button class="lang-btn" onclick="selectLanguage('ja')">🇯🇵 日本語</button>
+                <button class="lang-btn" onclick="selectLanguage('zh')">🇨🇳 中文</button>
+                <button class="lang-btn" onclick="selectLanguage('es')">🇪🇸 Español</button>
+                <button class="lang-btn" onclick="selectLanguage('ar')">🇸🇦 العربية</button>
+                <button class="lang-btn" onclick="selectLanguage('ru')">🇷🇺 Русский</button>
+            </div>
+
+            <h2>Game Instructions</h2>
+            <div class="instructions">
+                <ul>
+                    <li>🎯 Math problems will be presented</li>
+                    <li>⏰ 40 seconds time limit per question</li>
+                    <li>✨ Base 10 points + time bonus!</li>
+                    <li>🔥 Streak bonus for consecutive correct answers!</li>
+                    <li>📝 Use π = 3 for calculations</li>
+                    <li>🔢 Enter integer answers only</li>
+                    <li>🏆 Your score will be saved to the leaderboard!</li>
+                </ul>
+            </div>
+
+            <button class="btn btn-start" onclick="startGame()">Start Game!</button>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Score</div>
+                    <div class="info-value" id="score">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Question</div>
+                    <div class="info-value" id="questionCount">0/10</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Time Left</div>
+                    <div class="info-value timer" id="timer">40</div>
+                </div>
+            </div>
+
+            <div class="question-area">
+                <div class="question-text" id="questionText"></div>
+                <canvas id="shapeCanvas" width="400" height="250"></canvas>
+                <div id="streak" class="streak hidden"></div>
+            </div>
+
+            <input type="number" class="answer-input" id="answerInput" placeholder="Enter your answer">
+            <button class="btn btn-submit" onclick="submitAnswer()">Submit Answer</button>
+            <button class="btn btn-secondary" onclick="quitGame()">Back to Home</button>
+        </div>
+
+        <div id="endScreen" class="end-screen hidden">
+            <h2>Game Over!</h2>
+            <div class="final-score" id="finalScore">0</div>
+
+            <div class="score-breakdown" id="scoreBreakdown"></div>
+
+            <div class="name-input-section" id="nameInputSection">
+                <h3>Save to Leaderboard</h3>
+                <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+                <button class="btn btn-start" onclick="saveScore()">Save Score</button>
+            </div>
+
+            <div id="savedMessage" class="hidden" style="margin: 15px 0; color: #2ecc71; font-weight: bold;">
+                ✅ Score saved!
+            </div>
+
+            <button class="btn btn-start" onclick="restartGame()">Play Again</button>
+            <button class="btn btn-secondary" onclick="goHome()">Back to Home</button>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let questionNumber = 0;
+        let currentAnswer = 0;
+        let currentFormula = '';
+        let timeLeft = 40;
+        let timerInterval;
+        let streak = 0;
+        let basePoints = 0;
+        let timeBonus = 0;
+        let streakBonus = 0;
+        let currentGameId = Date.now();
+        let selectedLevel = 'high';
+        let selectedLanguage = 'en';
+        let usedQuestionTypes = [];
+
+        const translations = {
+            en: {
+                title: '📐 Math Quiz Game',
+                selectLevel: 'Select Difficulty Level',
+                elementary: 'Elementary',
+                middle: 'Middle School',
+                high: 'High School',
+                selectLanguage: 'Select Language',
+                instructions: 'Game Instructions',
+                inst1: 'Math problems will be presented',
+                inst2: '40 seconds time limit per question',
+                inst3: 'Base 10 points + time bonus!',
+                inst4: 'Streak bonus for consecutive correct answers!',
+                inst5: 'Use π = 3 for calculations',
+                inst6: 'Enter integer answers only',
+                inst7: 'Your score will be saved to the leaderboard!',
+                startGame: 'Start Game!',
+                score: 'Score',
+                question: 'Question',
+                timeLeft: 'Time Left',
+                enterAnswer: 'Enter your answer',
+                submit: 'Submit Answer',
+                backHome: 'Back to Home',
+                gameOver: 'Game Over!',
+                saveToLeaderboard: 'Save to Leaderboard',
+                enterName: 'Enter your name',
+                saveScore: 'Save Score',
+                scoreSaved: 'Score saved!',
+                playAgain: 'Play Again',
+                correct: 'Correct!',
+                incorrect: 'Incorrect',
+                timeUp: "Time's Up!",
+                correctAnswer: 'Correct answer',
+                timeBonus: 'Time Bonus',
+                streakBonus: 'Streak Bonus',
+                consecutive: 'consecutive',
+                formula: 'Formula',
+                baseScore: 'Base Score',
+                totalScore: 'Total Score',
+                correctAnswers: 'correct',
+                quitConfirm: 'Are you sure you want to quit?'
+            },
+            ja: {
+                title: '📐 数学クイズゲーム',
+                selectLevel: '難易度を選択',
+                elementary: '小学生',
+                middle: '中学生',
+                high: '高校生',
+                selectLanguage: '言語を選択',
+                instructions: 'ゲームの説明',
+                inst1: '数学問題が出題されます',
+                inst2: '1問40秒の制限時間',
+                inst3: '基本10点+時間ボーナス!',
+                inst4: '連続正解でボーナスポイント!',
+                inst5: '円周率は3として計算',
+                inst6: '答えは整数で入力',
+                inst7: 'スコアはランキングに保存されます!',
+                startGame: 'ゲーム開始!',
+                score: 'スコア',
+                question: '問題数',
+                timeLeft: '残り時間',
+                enterAnswer: '答えを入力してください',
+                submit: '回答する',
+                backHome: 'ホームに戻る',
+                gameOver: 'ゲーム終了!',
+                saveToLeaderboard: 'ランキングに登録',
+                enterName: '名前を入力してください',
+                saveScore: 'スコアを保存',
+                scoreSaved: 'スコアが保存されました!',
+                playAgain: 'もう一度プレイ',
+                correct: '正解!',
+                incorrect: '不正解',
+                timeUp: '時間切れ!',
+                correctAnswer: '正解は',
+                timeBonus: '時間ボーナス',
+                streakBonus: '連続ボーナス',
+                consecutive: '連続',
+                formula: '計算式',
+                baseScore: '基本点',
+                totalScore: '合計スコア',
+                correctAnswers: '問正解',
+                quitConfirm: '現在のゲームを終了しますか？'
+            },
+            zh: {
+                title: '📐 数学测验游戏',
+                selectLevel: '选择难度',
+                elementary: '小学',
+                middle: '初中',
+                high: '高中',
+                selectLanguage: '选择语言',
+                instructions: '游戏说明',
+                inst1: '将出现数学问题',
+                inst2: '每题40秒限时',
+                inst3: '基础10分+时间奖励!',
+                inst4: '连续答对有奖励分!',
+                inst5: '使用π=3计算',
+                inst6: '只输入整数答案',
+                inst7: '分数将保存到排行榜!',
+                startGame: '开始游戏!',
+                score: '分数',
+                question: '题数',
+                timeLeft: '剩余时间',
+                enterAnswer: '输入答案',
+                submit: '提交答案',
+                backHome: '返回主页',
+                gameOver: '游戏结束!',
+                saveToLeaderboard: '保存到排行榜',
+                enterName: '输入姓名',
+                saveScore: '保存分数',
+                scoreSaved: '分数已保存!',
+                playAgain: '再玩一次',
+                correct: '正确!',
+                incorrect: '错误',
+                timeUp: '时间到!',
+                correctAnswer: '正确答案',
+                timeBonus: '时间奖励',
+                streakBonus: '连续奖励',
+                consecutive: '连续',
+                formula: '公式',
+                baseScore: '基础分',
+                totalScore: '总分',
+                correctAnswers: '题正确',
+                quitConfirm: '确定要退出当前游戏吗？'
+            },
+            es: {
+                title: '📐 Juego de Matemáticas',
+                selectLevel: 'Seleccionar Dificultad',
+                elementary: 'Primaria',
+                middle: 'Secundaria',
+                high: 'Preparatoria',
+                selectLanguage: 'Seleccionar Idioma',
+                instructions: 'Instrucciones',
+                inst1: 'Se presentarán problemas matemáticos',
+                inst2: 'Límite de 40 segundos por pregunta',
+                inst3: '10 puntos base + bonificación de tiempo!',
+                inst4: 'Bonificación por respuestas correctas consecutivas!',
+                inst5: 'Usa π = 3 para cálculos',
+                inst6: 'Ingresa solo respuestas enteras',
+                inst7: 'Tu puntuación se guardará en la tabla!',
+                startGame: 'Iniciar Juego!',
+                score: 'Puntuación',
+                question: 'Pregunta',
+                timeLeft: 'Tiempo',
+                enterAnswer: 'Ingresa tu respuesta',
+                submit: 'Enviar',
+                backHome: 'Volver',
+                gameOver: 'Juego Terminado!',
+                saveToLeaderboard: 'Guardar',
+                enterName: 'Ingresa tu nombre',
+                saveScore: 'Guardar',
+                scoreSaved: 'Puntuación guardada!',
+                playAgain: 'Jugar de Nuevo',
+                correct: 'Correcto!',
+                incorrect: 'Incorrecto',
+                timeUp: 'Tiempo Agotado!',
+                correctAnswer: 'Respuesta correcta',
+                timeBonus: 'Bonificación',
+                streakBonus: 'Bonificación Racha',
+                consecutive: 'consecutivas',
+                formula: 'Fórmula',
+                baseScore: 'Puntuación Base',
+                totalScore: 'Puntuación Total',
+                correctAnswers: 'correctas',
+                quitConfirm: '¿Seguro que quieres salir?'
+            },
+            ar: {
+                title: '📐 لعبة الرياضيات',
+                selectLevel: 'اختر المستوى',
+                elementary: 'ابتدائي',
+                middle: 'إعدادي',
+                high: 'ثانوي',
+                selectLanguage: 'اختر اللغة',
+                instructions: 'التعليمات',
+                inst1: 'ستظهر مسائل رياضية',
+                inst2: '40 ثانية لكل سؤال',
+                inst3: '10 نقاط أساسية + مكافأة الوقت!',
+                inst4: 'مكافأة للإجابات الصحيحة المتتالية!',
+                inst5: 'استخدم π = 3 للحسابات',
+                inst6: 'أدخل إجابات صحيحة فقط',
+                inst7: 'سيتم حفظ نقاطك!',
+                startGame: 'ابدأ اللعبة!',
+                score: 'النقاط',
+                question: 'السؤال',
+                timeLeft: 'الوقت',
+                enterAnswer: 'أدخل إجابتك',
+                submit: 'إرسال',
+                backHome: 'العودة',
+                gameOver: 'انتهت اللعبة!',
+                saveToLeaderboard: 'حفظ',
+                enterName: 'أدخل اسمك',
+                saveScore: 'حفظ',
+                scoreSaved: 'تم حفظ النقاط!',
+                playAgain: 'العب مرة أخرى',
+                correct: 'صحيح!',
+                incorrect: 'خطأ',
+                timeUp: 'انتهى الوقت!',
+                correctAnswer: 'الإجابة الصحيحة',
+                timeBonus: 'مكافأة الوقت',
+                streakBonus: 'مكافأة التتابع',
+                consecutive: 'متتالية',
+                formula: 'الصيغة',
+                baseScore: 'النقاط الأساسية',
+                totalScore: 'مجموع النقاط',
+                correctAnswers: 'صحيحة',
+                quitConfirm: 'هل تريد الخروج؟'
+            },
+            ru: {
+                title: '📐 Математическая викторина',
+                selectLevel: 'Выберите уровень',
+                elementary: 'Начальная',
+                middle: 'Средняя',
+                high: 'Старшая',
+                selectLanguage: 'Выберите язык',
+                instructions: 'Инструкции',
+                inst1: 'Будут представлены математические задачи',
+                inst2: 'Ограничение 40 секунд на вопрос',
+                inst3: 'Базовые 10 баллов + временной бонус!',
+                inst4: 'Бонус за последовательные правильные ответы!',
+                inst5: 'Используйте π = 3',
+                inst6: 'Вводите только целые числа',
+                inst7: 'Ваш счет будет сохранен!',
+                startGame: 'Начать игру!',
+                score: 'Счет',
+                question: 'Вопрос',
+                timeLeft: 'Осталось',
+                enterAnswer: 'Введите ответ',
+                submit: 'Отправить',
+                backHome: 'На главную',
+                gameOver: 'Игра окончена!',
+                saveToLeaderboard: 'Сохранить',
+                enterName: 'Введите имя',
+                saveScore: 'Сохранить',
+                scoreSaved: 'Счет сохранен!',
+                playAgain: 'Играть снова',
+                correct: 'Правильно!',
+                incorrect: 'Неправильно',
+                timeUp: 'Время вышло!',
+                correctAnswer: 'Правильный ответ',
+                timeBonus: 'Временной бонус',
+                streakBonus: 'Бонус серии',
+                consecutive: 'подряд',
+                formula: 'Формула',
+                baseScore: 'Базовый счет',
+                totalScore: 'Общий счет',
+                correctAnswers: 'правильных',
+                quitConfirm: 'Вы уверены?'
+            }
+        };
+
+        function t(key) {
+            return translations[selectedLanguage][key] || translations['en'][key];
+        }
+
+        function updateLanguage() {
+            document.getElementById('gameTitle').textContent = t('title');
+            document.querySelectorAll('.level-btn')[0].innerHTML = '🟢<br>' + t('elementary');
+            document.querySelectorAll('.level-btn')[1].innerHTML = '🟡<br>' + t('middle');
+            document.querySelectorAll('.level-btn')[2].innerHTML = '🔴<br>' + t('high');
+
+            document.querySelectorAll('h2')[0].textContent = t('selectLevel');
+            document.querySelectorAll('h2')[1].textContent = t('selectLanguage');
+            document.querySelectorAll('h2')[2].textContent = t('instructions');
+
+            document.querySelector('.instructions').innerHTML = `
+                <ul>
+                    <li>🎯 ${t('inst1')}</li>
+                    <li>⏰ ${t('inst2')}</li>
+                    <li>✨ ${t('inst3')}</li>
+                    <li>🔥 ${t('inst4')}</li>
+                    <li>📝 ${t('inst5')}</li>
+                    <li>🔢 ${t('inst6')}</li>
+                    <li>🏆 ${t('inst7')}</li>
+                </ul>
+            `;
+
+            document.querySelector('.btn-start').textContent = t('startGame');
+            document.querySelectorAll('.info-label')[0].textContent = t('score');
+            document.querySelectorAll('.info-label')[1].textContent = t('question');
+            document.querySelectorAll('.info-label')[2].textContent = t('timeLeft');
+            document.getElementById('answerInput').placeholder = t('enterAnswer');
+            document.querySelector('.btn-submit').textContent = t('submit');
+            document.querySelectorAll('.btn-secondary')[0].textContent = t('backHome');
+        }
+
+        const questionSets = {
+            elementary: [
+                {
+                    type: 'rect1',
+                    generate: () => {
+                        const w = Math.floor(Math.random() * 8) + 3;
+                        const h = Math.floor(Math.random() * 8) + 3;
+                        return { text: `Rectangle area (width: ${w}cm, height: ${h}cm)`, params: {w,h}, answer: w*h, formula: `${w}×${h}=${w*h}` };
+                    }
+                },
+                {
+                    type: 'tri1',
+                    generate: () => {
+                        const b = Math.floor(Math.random() * 5) * 2 + 4;
+                        const h = Math.floor(Math.random() * 5) * 2 + 4;
+                        return { text: `Triangle area (base: ${b}cm, height: ${h}cm)`, params: {b,h}, answer: b*h/2, formula: `${b}×${h}÷2=${b*h/2}` };
+                    }
+                },
+                {
+                    type: 'circ1',
+                    generate: () => {
+                        const r = Math.floor(Math.random() * 6) + 3;
+                        return { text: `Circle area (radius: ${r}cm, π=3)`, params: {r}, answer: r*r*3, formula: `${r}²×3=${r*r*3}` };
+                    }
+                },
+                {
+                    type: 'sqper1',
+                    generate: () => {
+                        const s = Math.floor(Math.random() * 8) + 4;
+                        return { text: `Square perimeter (side: ${s}cm)`, params: {s}, answer: s*4, formula: `${s}×4=${s*4}` };
+                    }
+                },
+                {
+                    type: 'ang1',
+                    generate: () => {
+                        const a1 = Math.floor(Math.random() * 6) * 10 + 40;
+                        const a2 = Math.floor(Math.random() * 5) * 10 + 30;
+                        const a3 = 180 - a1 - a2;
+                        return { text: `Triangle angle x (angles: ${a1}°, ${a2}°, x°)`, params: {a1,a2}, answer: a3, formula: `180-${a1}-${a2}=${a3}` };
+                    }
+                },
+                {
+                    type: 'add1',
+                    generate: () => {
+                        const a = Math.floor(Math.random() * 500) + 100;
+                        const b = Math.floor(Math.random() * 500) + 100;
+                        return { text: `Calculate: ${a} + ${b}`, params: {a,b}, answer: a+b, formula: `${a}+${b}=${a+b}` };
+                    }
+                },
+                {
+                    type: 'sub1',
+                    generate: () => {
+                        const a = Math.floor(Math.random() * 500) + 500;
+                        const b = Math.floor(Math.random() * 300) + 100;
+                        return { text: `Calculate: ${a} - ${b}`, params: {a,b}, answer: a-b, formula: `${a}-${b}=${a-b}` };
+                    }
+                },
+                {
+                    type: 'mul1',
+                    generate: () => {
+                        const a = Math.floor(Math.random() * 20) + 10;
+                        const b = Math.floor(Math.random() * 9) + 2;
+                        return { text: `Calculate: ${a} × ${b}`, params: {a,b}, answer: a*b, formula: `${a}×${b}=${a*b}` };
+                    }
+                },
+                {
+                    type: 'div1',
+                    generate: () => {
+                        const b = Math.floor(Math.random() * 9) + 2;
+                        const ans = Math.floor(Math.random() * 20) + 5;
+                        const a = b * ans;
+                        return { text: `Calculate: ${a} ÷ ${b}`, params: {a,b}, answer: ans, formula: `${a}÷${b}=${ans}` };
+                    }
+                },
+                {
+                    type: 'cube1',
+                    generate: () => {
+                        const s = Math.floor(Math.random() * 6) + 3;
+                        return { text: `Cube volume (side: ${s}cm)`, params: {s}, answer: s*s*s, formula: `${s}³=${s*s*s}` };
+                    }
+                }
+            ],
+            middle: [
+                {
+                    type: 'circ2',
+                    generate: () => {
+                        const r = Math.floor(Math.random() * 8) + 3;
+                        return { text: `Circle area (radius: ${r}cm, π=3)`, params: {r}, answer: r*r*3, formula: `${r}²×3=${r*r*3}` };
+                    }
+                },
+                {
+                    type: 'sect2',
+                    generate: () => {
+                        const r = Math.floor(Math.random() * 4) * 2 + 6;
+                        const ang = [60, 90, 120][Math.floor(Math.random() * 3)];
+                        const a = Math.floor(r*r*3*ang/360);
+                        return { text: `Sector area (r: ${r}cm, angle: ${ang}°, π=3)`, params: {r,ang}, answer: a, formula: `${r}²×3×${ang}÷360=${a}` };
+                    }
+                },
+                {
+                    type: 'cyl2',
+                    generate: () => {
+                        const r = Math.floor(Math.random() * 3) * 2 + 4;
+                        const h = Math.floor(Math.random() * 4) + 5;
+                        return { text: `Cylinder volume (r: ${r}cm, h: ${h}cm, π=3)`, params: {r,h}, answer: r*r*3*h, formula: `${r}²×3×${h}=${r*r*3*h}` };
+                    }
+                },
+                {
+                    type: 'pyth2',
+                    generate: () => {
+                        const pairs = [[3,4,5], [5,12,13], [6,8,10]];
+                        const [a,b,c] = pairs[Math.floor(Math.random() * pairs.length)];
+                        return { text: `Right triangle - find c (a=${a}, b=${b})`, params: {a,b}, answer: c, formula: `√(${a}²+${b}²)=${c}` };
+                    }
+                },
+                {
+                    type: 'para2',
+                    generate: () => {
+                        const b = Math.floor(Math.random() * 6) + 6;
+                        const h = Math.floor(Math.random() * 5) + 4;
+                        return { text: `Parallelogram area (base: ${b}cm, h: ${h}cm)`, params: {b,h}, answer: b*h, formula: `${b}×${h}=${b*h}` };
+                    }
+                },
+                {
+                    type: 'trap2',
+                    generate: () => {
+                        const t = Math.floor(Math.random() * 3) * 2 + 4;
+                        const bot = Math.floor(Math.random() * 3) * 2 + 10;
+                        const h = Math.floor(Math.random() * 4) + 4;
+                        const a = (t+bot)*h/2;
+                        return { text: `Trapezoid area (top: ${t}, bot: ${bot}, h: ${h}cm)`, params: {t,bot,h}, answer: a, formula: `(${t}+${bot})×${h}÷2=${a}` };
+                    }
+                },
+                {
+                    type: 'poly2',
+                    generate: () => {
+                        const n = [5, 6, 8][Math.floor(Math.random() * 3)];
+                        const sum = (n-2)*180;
+                        return { text: `Sum of interior angles (${n}-gon)`, params: {n}, answer: sum, formula: `(${n}-2)×180=${sum}` };
+                    }
+                },
+                {
+                    type: 'circ3',
+                    generate: () => {
+                        const r = Math.floor(Math.random() * 6) + 4;
+                        const c = 2*r*3;
+                        return { text: `Circle circumference (r: ${r}cm, π=3)`, params: {r}, answer: c, formula: `2×${r}×3=${c}` };
+                    }
+                },
+                {
+                    type: 'lin2',
+                    generate: () => {
+                        const x = Math.floor(Math.random() * 15) + 3;
+                        const a = Math.floor(Math.random() * 5) + 2;
+                        const b = Math.floor(Math.random() * 20) + 5;
+                        const res = a*x+b;
+                        return { text: `Solve: ${a}x + ${b} = ${res}, find x`, params: {a,b,res}, answer: x, formula: `x=(${res}-${b})÷${a}=${x}` };
+                    }
+                },
+                {
+                    type: 'quad2',
+                    generate: () => {
+                        const x = Math.floor(Math.random() * 8) + 2;
+                        const res = x*x;
+                        return { text: `Solve: x² = ${res}, find positive x`, params: {res}, answer: x, formula: `x=√${res}=${x}` };
+                    }
+                }
+            ],
+            high: [
+                {
+                    type: 'sph1',
+                    generate: () => {
+                        const r = Math.floor(Math.random() * 4) + 4;
+                        return { text: `Sphere surface (r: ${r}cm, π=3)`, params: {r}, answer: 4*r*r*3, formula: `4×${r}²×3=${4*r*r*3}` };
+                    }
+                },
+                {
+                    type: 'sph2',
+                    generate: () => {
+                        const r = [3, 6][Math.floor(Math.random() * 2)];
+                        const v = Math.floor(4*r*r*r*3/3);
+                        return { text: `Sphere volume (r: ${r}cm, π=3)`, params: {r}, answer: v, formula: `4×${r}³×3÷3=${v}` };
+                    }
+                },
+                {
+                    type: 'con1',
+                    generate: () => {
+                        const r = Math.floor(Math.random() * 3) * 2 + 4;
+                        const l = r*2;
+                        const s = r*r*3+r*l*3;
+                        return { text: `Cone surface (r: ${r}cm, l: ${l}cm, π=3)`, params: {r,l}, answer: s, formula: `${r}²×3+${r}×${l}×3=${s}` };
+                    }
+                },
+                {
+                    type: 'con2',
+                    generate: () => {
+                        const r = [3, 6][Math.floor(Math.random() * 2)];
+                        const h = Math.floor(Math.random() * 3) * 3 + 6;
+                        const v = Math.floor(r*r*3*h/3);
+                        return { text: `Cone volume (r: ${r}cm, h: ${h}cm, π=3)`, params: {r,h}, answer: v, formula: `${r}²×3×${h}÷3=${v}` };
+                    }
+                },
+                {
+                    type: 'pyr1',
+                    generate: () => {
+                        const b = Math.floor(Math.random() * 3) * 3 + 6;
+                        const h = Math.floor(Math.random() * 3) * 3 + 6;
+                        const v = Math.floor(b*b*h/3);
+                        return { text: `Square pyramid volume (base: ${b}cm, h: ${h}cm)`, params: {b,h}, answer: v, formula: `${b}²×${h}÷3=${v}` };
+                    }
+                },
+                {
+                    type: 'sin1',
+                    generate: () => {
+                        const a = Math.floor(Math.random() * 4) * 2 + 8;
+                        const b = Math.floor(Math.random() * 4) * 2 + 8;
+                        const ar = Math.floor(a*b*0.5/2);
+                        return { text: `Triangle area (a=${a}, b=${b}, C=30°, sin30°=0.5)`, params: {a,b}, answer: ar, formula: `${a}×${b}×0.5÷2=${ar}` };
+                    }
+                },
+                {
+                    type: 'arc1',
+                    generate: () => {
+                        const r = Math.floor(Math.random() * 4) + 5;
+                        const ang = [60, 90, 120][Math.floor(Math.random() * 3)];
+                        const arc = Math.floor(2*r*3*ang/360);
+                        return { text: `Arc length (r: ${r}cm, θ: ${ang}°, π=3)`, params: {r,ang}, answer: arc, formula: `2×${r}×3×${ang}÷360=${arc}` };
+                    }
+                },
+                {
+                    type: 'insc1',
+                    generate: () => {
+                        const cent = [80, 100, 120, 140][Math.floor(Math.random() * 4)];
+                        const ins = cent/2;
+                        return { text: `Inscribed angle (central: ${cent}°)`, params: {cent}, answer: ins, formula: `${cent}÷2=${ins}` };
+                    }
+                },
+                {
+                    type: 'poly3',
+                    generate: () => {
+                        const n = [5, 6, 8, 10][Math.floor(Math.random() * 4)];
+                        const ang = Math.floor((n-2)*180/n);
+                        return { text: `Regular ${n}-gon interior angle`, params: {n}, answer: ang, formula: `(${n}-2)×180÷${n}=${ang}` };
+                    }
+                },
+                {
+                    type: 'quad3',
+                    generate: () => {
+                        const sols = [[2,3], [3,4], [1,5], [2,4]];
+                        const [x1,x2] = sols[Math.floor(Math.random() * sols.length)];
+                        const b = -(x1+x2);
+                        const c = x1*x2;
+                        const sign1 = b >= 0 ? '+' : '';
+                        const sign2 = c >= 0 ? '+' : '';
+                        return { text: `x²${sign1}${b}x${sign2}${c}=0, larger x`, params: {b,c}, answer: Math.max(x1,x2), formula: `x=${x1} or ${x2}, max=${Math.max(x1,x2)}` };
+                    }
+                },
+                {
+                    type: 'disc1',
+                    generate: () => {
+                        const b = Math.floor(Math.random() * 8) + 2;
+                        const c = Math.floor(Math.random() * 8) + 1;
+                        const d = b*b-4*c;
+                        return { text: `x²+${b}x+${c}=0, discriminant b²-4ac`, params: {b,c}, answer: d, formula: `${b}²-4×${c}=${d}` };
+                    }
+                }
+            ]
+        };
+
+        function selectLevel(level) {
+            selectedLevel = level;
+            document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function selectLanguage(lang) {
+            selectedLanguage = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function startGame() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            score = 0;
+            questionNumber = 0;
+            streak = 0;
+            basePoints = 0;
+            timeBonus = 0;
+            streakBonus = 0;
+            currentGameId = Date.now();
+            usedQuestionTypes = [];
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            if (questionNumber >= 10) {
+                endGame();
+                return;
+            }
+
+            questionNumber++;
+            timeLeft = 40;
+            document.getElementById('questionCount').textContent = questionNumber + '/10';
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').focus();
+
+            const questions = questionSets[selectedLevel];
+            let questionType;
+            let attempts = 0;
+
+            do {
+                questionType = questions[Math.floor(Math.random() * questions.length)];
+                attempts++;
+            } while (usedQuestionTypes.includes(questionType.type) && attempts < 100);
+
+            usedQuestionTypes.push(questionType.type);
+            const question = questionType.generate();
+
+            currentAnswer = question.answer;
+            currentFormula = question.formula;
+
+            document.getElementById('questionText').innerHTML = question.text;
+            drawShape(questionType.type, question.params);
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            const timerEl = document.getElementById('timer');
+            timerEl.textContent = timeLeft;
+
+            if (timeLeft > 30) {
+                timerEl.classList.add('fast');
+            } else {
+                timerEl.classList.remove('fast');
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                showPopup(false, "Time's Up!", `Correct answer: ${currentAnswer}`, currentFormula, 0, 0, 0);
+                streak = 0;
+                setTimeout(nextQuestion, 3000);
+            }
+        }
+
+        function submitAnswer() {
+            const userAnswer = parseInt(document.getElementById('answerInput').value);
+
+            if (isNaN(userAnswer)) {
+                alert('Please enter a number');
+                return;
+            }
+
+            clearInterval(timerInterval);
+
+            const isCorrect = userAnswer === currentAnswer;
+
+            if (isCorrect) {
+                streak++;
+
+                const base = 10;
+                const timeB = Math.max(0, timeLeft);
+                const streakB = streak >= 3 ? (streak - 2) * 5 : 0;
+                const totalPoints = base + timeB + streakB;
+
+                score += totalPoints;
+                basePoints += base;
+                timeBonus += timeB;
+                streakBonus += streakB;
+
+                let bonusText = '';
+                if (timeB > 0) bonusText += `⚡Time Bonus: +${timeB}<br>`;
+                if (streakB > 0) bonusText += `🔥Streak Bonus (${streak} consecutive): +${streakB}`;
+
+                showPopup(true, 'Correct!', bonusText, currentFormula, base, timeB, streakB);
+            } else {
+                streak = 0;
+                showPopup(false, 'Incorrect', `Correct answer: ${currentAnswer}`, currentFormula, 0, 0, 0);
+            }
+
+            document.getElementById('score').textContent = score;
+            updateStreak();
+
+            setTimeout(nextQuestion, 3000);
+        }
+
+        function showPopup(isCorrect, message, detail, formula, base, timeB, streakB) {
+            const overlay = document.createElement('div');
+            overlay.className = 'popup-overlay';
+
+            const totalPoints = base + timeB + streakB;
+
+            overlay.innerHTML = `
+                <div class="popup ${isCorrect ? 'correct' : 'incorrect'}">
+                    <div class="popup-icon">${isCorrect ? '🎉' : '😢'}</div>
+                    <div class="popup-message">${message}</div>
+                    ${detail ? `<div class="popup-detail">${detail}</div>` : ''}
+                    ${formula ? `<div class="popup-detail">Formula: ${formula}</div>` : ''}
+                    ${isCorrect ? `<div class="popup-points">+${totalPoints}</div>` : ''}
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            setTimeout(() => {
+                overlay.remove();
+            }, 2800);
+        }
+
+        function updateStreak() {
+            const streakEl = document.getElementById('streak');
+            if (streak >= 3) {
+                streakEl.textContent = `🔥 Consecutive ${streak}!`;
+                streakEl.classList.remove('hidden');
+            } else {
+                streakEl.classList.add('hidden');
+            }
+        }
+
+        function drawShape(type, params) {
+            const canvas = document.getElementById('shapeCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (type.includes('add') || type.includes('sub') || type.includes('mul') ||
+                type.includes('div') || type.includes('lin') || type.includes('quad') ||
+                type.includes('disc')) {
+                return;
+            }
+
+            ctx.strokeStyle = '#667eea';
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.2)';
+            ctx.lineWidth = 3;
+
+            const cx = 200;
+            const cy = 125;
+
+            if (type.includes('rect')) {
+                const w = params.w * 15;
+                const h = params.h * 12;
+                ctx.fillRect(cx-w/2, cy-h/2, w, h);
+                ctx.strokeRect(cx-w/2, cy-h/2, w, h);
+            } else if (type.includes('tri')) {
+                const b = (params.b || 10) * 12;
+                const h = (params.h || 10) * 10;
+                ctx.beginPath();
+                ctx.moveTo(cx-b/2, cy+h/2);
+                ctx.lineTo(cx+b/2, cy+h/2);
+                ctx.lineTo(cx, cy-h/2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (type.includes('circ')) {
+                const r = params.r * 10;
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, Math.PI*2);
+                ctx.fill();
+                ctx.stroke();
+            } else if (type.includes('sqper')) {
+                const s = params.s * 12;
+                ctx.fillRect(cx-s/2, cy-s/2, s, s);
+                ctx.strokeRect(cx-s/2, cy-s/2, s, s);
+            } else if (type.includes('ang')) {
+                ctx.beginPath();
+                ctx.moveTo(cx-60, cy+40);
+                ctx.lineTo(cx+60, cy+40);
+                ctx.lineTo(cx, cy-40);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (type.includes('cube')) {
+                const s = params.s * 10;
+                ctx.fillRect(cx-s/2, cy-s/2, s, s);
+                ctx.strokeRect(cx-s/2, cy-s/2, s, s);
+            } else if (type.includes('sect')) {
+                const r = params.r * 8;
+                const ang = params.ang * Math.PI / 180;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, r, -ang/2, ang/2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (type.includes('cyl')) {
+                const r = params.r * 6;
+                const h = params.h * 8;
+                ctx.beginPath();
+                ctx.ellipse(cx, cy-h/2, r, 10, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.ellipse(cx, cy+h/2, r, 10, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx-r, cy-h/2);
+                ctx.lineTo(cx-r, cy+h/2);
+                ctx.moveTo(cx+r, cy-h/2);
+                ctx.lineTo(cx+r, cy+h/2);
+                ctx.stroke();
+            } else if (type.includes('pyth')) {
+                ctx.beginPath();
+                ctx.moveTo(cx-50, cy+50);
+                ctx.lineTo(cx+50, cy+50);
+                ctx.lineTo(cx+50, cy-50);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (type.includes('para')) {
+                const b = params.b * 10;
+                const h = params.h * 8;
+                ctx.beginPath();
+                ctx.moveTo(cx-b/2+20, cy-h/2);
+                ctx.lineTo(cx+b/2+20, cy-h/2);
+                ctx.lineTo(cx+b/2-20, cy+h/2);
+                ctx.lineTo(cx-b/2-20, cy+h/2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (type.includes('trap')) {
+                const t = params.t * 10;
+                const bot = params.bot * 10;
+                const h = params.h * 8;
+                ctx.beginPath();
+                ctx.moveTo(cx-t/2, cy-h/2);
+                ctx.lineTo(cx+t/2, cy-h/2);
+                ctx.lineTo(cx+bot/2, cy+h/2);
+                ctx.lineTo(cx-bot/2, cy+h/2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (type.includes('sph')) {
+                const r = params.r * 10;
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, Math.PI*2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, r, r/3, 0, 0, Math.PI*2);
+                ctx.strokeStyle = '#999';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            } else if (type.includes('con')) {
+                const r = params.r * 7;
+                const h = (params.h || params.l || 12) * 5;
+                ctx.beginPath();
+                ctx.ellipse(cx, cy+h/2, r, 8, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx-r, cy+h/2);
+                ctx.lineTo(cx, cy-h/2);
+                ctx.lineTo(cx+r, cy+h/2);
+                ctx.stroke();
+            } else if (type.includes('pyr')) {
+                const b = params.b * 7;
+                const h = params.h * 7;
+                ctx.beginPath();
+                ctx.moveTo(cx-b/2, cy+h/2);
+                ctx.lineTo(cx+b/2, cy+h/2);
+                ctx.lineTo(cx+b/2-15, cy+h/2-15);
+                ctx.lineTo(cx-b/2-15, cy+h/2-15);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx-b/2, cy+h/2);
+                ctx.lineTo(cx, cy-h/2);
+                ctx.lineTo(cx+b/2, cy+h/2);
+                ctx.stroke();
+            } else if (type.includes('sin') || type.includes('arc') || type.includes('insc') || type.includes('poly')) {
+                ctx.beginPath();
+                ctx.moveTo(cx-60, cy+40);
+                ctx.lineTo(cx+60, cy+40);
+                ctx.lineTo(cx-20, cy-30);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+
+            const correctAnswers = Math.round(basePoints / 10);
+
+            const breakdown = document.getElementById('scoreBreakdown');
+            breakdown.innerHTML = `
+                <div><span>Base Score (${correctAnswers}/10 correct)</span><span>${basePoints}</span></div>
+                <div><span>Time Bonus</span><span>+${timeBonus}</span></div>
+                <div><span>Streak Bonus</span><span>+${streakBonus}</span></div>
+                <div><span>Total Score</span><span>${score}</span></div>
+            `;
+
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('endScreen').classList.remove('hidden');
+            document.getElementById('finalScore').textContent = score + 'pt';
+        }
+
+        async function saveScore() {
+            const name = document.getElementById('playerName').value.trim();
+            if (!name) {
+                alert('Please enter your name');
+                return;
+            }
+
+            const correctAnswers = Math.round(basePoints / 10);
+            const scoreData = {
+                name: name,
+                score: score,
+                correct: correctAnswers,
+                level: selectedLevel,
+                language: selectedLanguage,
+                basePoints: basePoints,
+                timeBonus: timeBonus,
+                streakBonus: streakBonus,
+                timestamp: currentGameId
+            };
+
+            try {
+                await window.storage.set(`myscore:${currentGameId}`, JSON.stringify(scoreData));
+                await window.storage.set(`score:${currentGameId}`, JSON.stringify(scoreData), true);
+
+                document.getElementById('nameInputSection').classList.add('hidden');
+                document.getElementById('savedMessage').classList.remove('hidden');
+            } catch (error) {
+                console.error('Score save error:', error);
+                alert('Note: Score saving requires the artifact to be opened in Claude.ai');
+            }
+        }
+
+        function restartGame() {
+            document.getElementById('endScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            score = 0;
+            questionNumber = 0;
+            streak = 0;
+            basePoints = 0;
+            timeBonus = 0;
+            streakBonus = 0;
+            currentGameId = Date.now();
+            usedQuestionTypes = [];
+            document.getElementById('savedMessage').classList.add('hidden');
+            document.getElementById('nameInputSection').classList.remove('hidden');
+            document.getElementById('playerName').value = '';
+            nextQuestion();
+        }
+
+        function goHome() {
+            document.getElementById('endScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+            document.getElementById('savedMessage').classList.add('hidden');
+            document.getElementById('nameInputSection').classList.remove('hidden');
+            document.getElementById('playerName').value = '';
+        }
+
+        function quitGame() {
+            if (confirm('Are you sure you want to quit the current game?')) {
+                clearInterval(timerInterval);
+                usedQuestionTypes = [];
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('startScreen').classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('answerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitAnswer();
+            }
+        });
+    </script>
+</body>
+</html>
